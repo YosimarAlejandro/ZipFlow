@@ -19,3 +19,7 @@ backend/obj
 # Sistema
 .DS_Store
 Thumbs.db
+
+#Carpetas
+backend/TempUploads/
+backend/TempProcessed/
