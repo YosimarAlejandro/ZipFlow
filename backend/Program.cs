@@ -1,11 +1,9 @@
 using backend.Services;
 using backend.Services.Interfaces;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Servicios
-builder.Services.AddOpenApi();
-builder.Services.AddControllers();
-
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
@@ -21,7 +19,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Mapear controladores
 app.MapControllers();
 
 app.Run();
