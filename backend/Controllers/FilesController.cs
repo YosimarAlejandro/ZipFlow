@@ -14,8 +14,17 @@ namespace backend.Controllers
             _optimizationService = optimizationService;
         }
         [HttpPost("upload")]
-        public async Task<IActionResult> Upload(IFormFile file)
+        public async Task<IActionResult> Upload(
+
+        IFormFile file,
+        [FromForm(Name = "compressionLevel")] string compression = "medium")
+
         {
+            Console.WriteLine("==============================");
+            Console.WriteLine(" VALORES RECIBIDOS CONTROLLER");
+            Console.WriteLine($"Archivo: {file?.FileName}");
+            Console.WriteLine($"Compression recibido: {compression}");
+            Console.WriteLine("==============================");
             if (file == null || file.Length == 0)
             {
                 return BadRequest(new
@@ -37,7 +46,7 @@ namespace backend.Controllers
             {
                 await file.CopyToAsync(stream);
             }
-            var optimizedFile = await _optimizationService.OptimizeAsync(filePath);
+            var optimizedFile = await _optimizationService.OptimizeAsync(filePath, compression);
 
             // Información del archivo original
             var originalInfo = new FileInfo(filePath);
@@ -49,6 +58,10 @@ namespace backend.Controllers
             double optimizedSizeMB = optimizedInfo.Length / 1024.0 / 1024.0;
 
             double reduction = 100 - ((optimizedSizeMB / originalSizeMB) * 100);
+            Console.WriteLine("===============================");
+            Console.WriteLine(" ZIPFLOW BACKEND RECEPCION");
+            Console.WriteLine($"Archivo: {file.FileName}");
+            Console.WriteLine("===============================");
             Console.WriteLine();
             Console.WriteLine("========================================");
             Console.WriteLine("         ZIPFLOW BENCHMARK");
@@ -65,6 +78,8 @@ namespace backend.Controllers
             return Ok(new
             {
                 message = "Archivo procesado correctamente.",
+
+                compressionLevel = compression,
 
                 originalFile = file.FileName,
                 originalSizeMB = Math.Round(originalSizeMB, 2),
