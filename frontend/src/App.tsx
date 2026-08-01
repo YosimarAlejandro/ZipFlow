@@ -1,5 +1,3 @@
-import React from 'react';
-
 export default function Login() {
   return (
     /* Contenedor principal: ocupa toda la pantalla, fondo sutil, evita scroll horizontal */
@@ -28,8 +26,8 @@ export default function Login() {
           {/* Encabezado del formulario */}
           <div className="text-center lg:text-left mb-10">
             {/* Título visible solo en móvil (ya que en escritorio está en el lado azul) */}
-            <h2 className="text-3xl font-extrabold text-blue-600 lg:hidden mb-4">ZipFlow</h2>
-            <h3 className="text-2xl font-bold text-gray-800">Bienvenido de nuevo</h3>
+            <img src="/img/Logo.jpeg" alt="Logo ZipFlow" />
+            <h3 className="text-2xl font-bold text-gray-800">Bienvenido</h3>
             <p className="text-gray-500 mt-2 text-sm sm:text-base">Inicia sesión en tu cuenta para continuar</p>
           </div>
 
