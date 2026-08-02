@@ -5,7 +5,15 @@ import type { CompressionLevel } from "../../types/compressionLevel";
 import { uploadFile } from "../../services/fileService";
 import ResultCard from "./ResultCard";
 
-export default function UploadBox() {
+interface UploadBoxProps {
+    onCompressionSuccess?: () => void;
+}
+
+export default function UploadBox({
+
+    onCompressionSuccess
+
+}: UploadBoxProps) {
     const inputRef = useRef<HTMLInputElement>(null);
 
     const [selectedFile, setSelectedFile] = useState<SelectedFile | null>(null);
@@ -78,7 +86,7 @@ export default function UploadBox() {
             console.log("Respuesta API:", response);
 
             setResult(response);
-
+            onCompressionSuccess?.();
         } catch (error) {
 
             console.error("ERROR FRONTEND:", error);

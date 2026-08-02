@@ -1,4 +1,4 @@
-import logo from "../assets/img/Logo.jpeg";
+import logo from "../../assets/img/Logo.jpeg";
 export default function Login() {
   return (
     /* Contenedor principal: ocupa toda la pantalla, fondo sutil, evita scroll horizontal */
