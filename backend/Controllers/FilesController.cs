@@ -90,5 +90,31 @@ namespace backend.Controllers
                 reductionPercentage = Math.Round(reduction, 2)
             });
         }
+        [HttpGet("download/{fileName}")]
+        public IActionResult Download(string fileName)
+        {
+            var filePath = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "TempProcessed",
+                fileName
+            );
+
+            if (!System.IO.File.Exists(filePath))
+            {
+                return NotFound(new
+                {
+                    message = "Archivo no encontrado."
+                });
+            }
+
+            var bytes = System.IO.File.ReadAllBytes(filePath);
+
+            return File(
+                bytes,
+                "application/octet-stream",
+                fileName
+            );
+        }
     }
+
 }
