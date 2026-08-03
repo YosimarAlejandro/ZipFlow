@@ -4,7 +4,7 @@ import HowItWorks from "../../components/home/HowItWorks";
 import Footer from "../../components/layout/Footer";
 import FreeCounter from "../../components/home/FreeCounter";
 import RegisterBanner from "../../components/home/RegisterBanner";
-
+import PublicNavbar from "../../components/layout/PublicNavbar";
 import useFreeCounter from "../../hooks/useFreeCounter";
 
 export default function Welcome() {
@@ -23,6 +23,7 @@ export default function Welcome() {
 
         <>
 
+            <PublicNavbar />
             <Hero />
 
             {hasRemaining ? (
