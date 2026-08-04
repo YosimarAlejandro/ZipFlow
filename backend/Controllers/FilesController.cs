@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using backend.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 namespace backend.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class FilesController : ControllerBase

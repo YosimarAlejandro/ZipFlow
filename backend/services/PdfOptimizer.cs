@@ -14,7 +14,16 @@ namespace backend.Services
                 .AddJsonFile("appsettings.json")
                 .Build();
 
-            var ghostscriptPath = configuration["Ghostscript:Executable"];
+            string? ghostscriptPath;
+
+            if (OperatingSystem.IsWindows())
+            {
+                ghostscriptPath = configuration["Ghostscript:WindowsExecutable"];
+            }
+            else
+            {
+                ghostscriptPath = configuration["Ghostscript:LinuxExecutable"];
+            }
 
             if (string.IsNullOrWhiteSpace(ghostscriptPath))
             {
