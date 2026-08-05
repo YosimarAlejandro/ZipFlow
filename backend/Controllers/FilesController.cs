@@ -138,7 +138,7 @@ namespace backend.Controllers
                 reductionPercentage = Math.Round(reduction, 2)
             });
         }
-        
+
         [HttpGet("download/{fileName}")]
         public IActionResult Download(string fileName)
         {
@@ -192,6 +192,86 @@ namespace backend.Controllers
                 .ToListAsync();
 
             return Ok(history);
+        }
+
+        [HttpGet("stats")]
+        public async Task<IActionResult> Stats()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                         ?? User.FindFirst("sub")?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var userGuid = Guid.Parse(userId);
+
+            var files = _context.FileRecords
+                .Where(x => x.UserId == userGuid);
+
+            var totalFiles = await files.CountAsync();
+
+            var totalSavedMB = await files.SumAsync(x =>
+                x.OriginalSizeMB - x.OptimizedSizeMB);
+
+            var averageReduction = totalFiles == 0
+                ? 0
+                : await files.AverageAsync(x => x.ReductionPercentage);
+
+            var favoriteCompression = totalFiles == 0
+                ? "N/A"
+                : await files
+                    .GroupBy(x => x.CompressionLevel)
+                    .OrderByDescending(g => g.Count())
+                    .Select(g => g.Key)
+                    .FirstAsync();
+
+            var stats = new StatsDto
+            {
+                TotalFiles = totalFiles,
+                TotalSavedMB = Math.Round(totalSavedMB, 2),
+                AverageReduction = Math.Round(averageReduction, 2),
+                FavoriteCompression = favoriteCompression
+            };
+
+            return Ok(stats);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                         ?? User.FindFirst("sub")?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var record = await _context.FileRecords.FindAsync(id);
+
+            if (record == null)
+            {
+                return NotFound(new
+                {
+                    message = "Registro no encontrado."
+                });
+            }
+
+            if (record.UserId != Guid.Parse(userId))
+            {
+                return Forbid();
+            }
+
+            _context.FileRecords.Remove(record);
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Registro eliminado correctamente."
+            });
         }
     }
 
