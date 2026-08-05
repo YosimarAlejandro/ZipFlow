@@ -12,5 +12,7 @@ namespace backend.Data
         }
 
         public DbSet<User> Users { get; set; }
+
+        public DbSet<FileRecord> FileRecords { get; set; }
     }
 }

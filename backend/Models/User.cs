@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 namespace backend.Models
 {
     public class User
@@ -9,9 +10,11 @@ namespace backend.Models
         public string Email { get; set; } = string.Empty;
 
         public string PasswordHash { get; set; } = string.Empty;
-        
+
         public string Role { get; set; } = "User";
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public ICollection<FileRecord> Files { get; set; } = new List<FileRecord>();
     }
 }
