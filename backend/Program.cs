@@ -29,6 +29,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddScoped<IFileOptimizationService, FileOptimizationService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection")));
