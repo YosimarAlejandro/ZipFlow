@@ -27,14 +27,14 @@ namespace backend.Controllers
         }
 
         [HttpPost("login")]
-public async Task<IActionResult> Login(LoginDto dto)
-{
-    var token = await _authService.LoginAsync(dto);
+        public async Task<IActionResult> Login(LoginDto dto)
+        {
+            var token = await _authService.LoginAsync(dto);
 
-    return Ok(new
-    {
-        token
-    });
-}
+            return Ok(new
+            {
+                token
+            });
+        }
     }
 }

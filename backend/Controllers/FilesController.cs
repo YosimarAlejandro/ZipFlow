@@ -1,11 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using backend.Data;
 using backend.Models;
 using System.Security.Claims;
-using backend.DTOs;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Controllers
 {
@@ -16,14 +13,14 @@ namespace backend.Controllers
     {
 
         private readonly IFileOptimizationService _optimizationService;
-        private readonly AppDbContext _context;
+        private readonly IFileRecordService _fileRecordService;
 
         public FilesController(
             IFileOptimizationService optimizationService,
-            AppDbContext context)
+            IFileRecordService fileRecordService)
         {
             _optimizationService = optimizationService;
-            _context = context;
+            _fileRecordService = fileRecordService;
         }
         [HttpPost("upload")]
         public async Task<IActionResult> Upload(
@@ -98,9 +95,7 @@ namespace backend.Controllers
                 CreatedAt = DateTime.UtcNow
             };
 
-            _context.FileRecords.Add(record);
-
-            await _context.SaveChangesAsync();
+            await _fileRecordService.CreateAsync(record);
 
             Console.WriteLine("========================================");
             Console.WriteLine("HISTORIAL GUARDADO");
@@ -176,20 +171,8 @@ namespace backend.Controllers
                 return Unauthorized();
             }
 
-            var history = await _context.FileRecords
-                .Where(x => x.UserId == Guid.Parse(userId))
-                .OrderByDescending(x => x.CreatedAt)
-                .Select(x => new FileRecordDto
-                {
-                    OriginalFileName = x.OriginalFileName,
-                    OptimizedFileName = x.OptimizedFileName,
-                    OriginalSizeMB = x.OriginalSizeMB,
-                    OptimizedSizeMB = x.OptimizedSizeMB,
-                    ReductionPercentage = x.ReductionPercentage,
-                    CompressionLevel = x.CompressionLevel,
-                    CreatedAt = x.CreatedAt
-                })
-                .ToListAsync();
+            var history = await _fileRecordService
+                .GetHistoryAsync(Guid.Parse(userId));
 
             return Ok(history);
         }
@@ -205,35 +188,8 @@ namespace backend.Controllers
                 return Unauthorized();
             }
 
-            var userGuid = Guid.Parse(userId);
-
-            var files = _context.FileRecords
-                .Where(x => x.UserId == userGuid);
-
-            var totalFiles = await files.CountAsync();
-
-            var totalSavedMB = await files.SumAsync(x =>
-                x.OriginalSizeMB - x.OptimizedSizeMB);
-
-            var averageReduction = totalFiles == 0
-                ? 0
-                : await files.AverageAsync(x => x.ReductionPercentage);
-
-            var favoriteCompression = totalFiles == 0
-                ? "N/A"
-                : await files
-                    .GroupBy(x => x.CompressionLevel)
-                    .OrderByDescending(g => g.Count())
-                    .Select(g => g.Key)
-                    .FirstAsync();
-
-            var stats = new StatsDto
-            {
-                TotalFiles = totalFiles,
-                TotalSavedMB = Math.Round(totalSavedMB, 2),
-                AverageReduction = Math.Round(averageReduction, 2),
-                FavoriteCompression = favoriteCompression
-            };
+            var stats = await _fileRecordService
+                .GetStatsAsync(Guid.Parse(userId));
 
             return Ok(stats);
         }
@@ -249,24 +205,16 @@ namespace backend.Controllers
                 return Unauthorized();
             }
 
-            var record = await _context.FileRecords.FindAsync(id);
+            var deleted = await _fileRecordService
+                .DeleteAsync(id, Guid.Parse(userId));
 
-            if (record == null)
+            if (!deleted)
             {
                 return NotFound(new
                 {
                     message = "Registro no encontrado."
                 });
             }
-
-            if (record.UserId != Guid.Parse(userId))
-            {
-                return Forbid();
-            }
-
-            _context.FileRecords.Remove(record);
-
-            await _context.SaveChangesAsync();
 
             return Ok(new
             {
