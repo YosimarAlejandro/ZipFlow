@@ -1,17 +1,19 @@
+// ResultCard.tsx
 import type { CompressionResponse } from "../../types/compression";
 
 interface Props {
-    result: CompressionResponse;
+    result?: CompressionResponse; // <--- Agregamos el ? aquí
 }
 
 export default function ResultCard({ result }: Props) {
-    const handleDownload = () => {
+    // Si no hay resultado, el componente no renderiza nada
+    if (!result) return null; 
 
+    const handleDownload = () => {
         window.open(
             `http://localhost:5039/api/files/download/${result.optimizedFile}`,
             "_blank"
         );
-
     };
 
     return (
