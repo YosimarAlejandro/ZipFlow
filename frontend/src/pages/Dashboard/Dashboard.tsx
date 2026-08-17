@@ -1,7 +1,6 @@
 import { useState } from "react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import UploadBox from "../../components/shared/upload/UploadBox"; 
-import ResultCard from "../../components/shared/ResultCard";
 import type { CompressionResponse } from "../../types/compression";
 
 export default function Dashboard() {
@@ -50,10 +49,7 @@ export default function Dashboard() {
                             />
                         </div>
 
-                        {/* ResultCard animado */}
-                        <div className="transition-all duration-500 ease-in-out">
-                            <ResultCard result={result || undefined} />
-                        </div>
+                       
                     </div>
 
                     {/* Columna Lateral / Sidebar */}

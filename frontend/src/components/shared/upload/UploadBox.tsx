@@ -100,6 +100,7 @@ export default function UploadBox({ onCompressionSuccess }: UploadBoxProps) {
                 />
             </div>
 
+            {/* Solo se pinta si existe 'result' en este componente */}
             {result && (
                 <ResultCard
                     result={result}

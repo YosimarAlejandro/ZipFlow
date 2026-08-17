@@ -8,54 +8,42 @@ export async function uploadFile(
     compressionLevel: CompressionLevel
 ): Promise<CompressionResponse> {
 
-
     console.log("========== FILE SERVICE ==========");
     console.log("Archivo enviado:", file.name);
     console.log("Peso:", file.size);
     console.log("CompressionLevel recibido:", compressionLevel);
     console.log("==================================");
 
-
     const formData = new FormData();
-
     formData.append("file", file);
     formData.append("compressionLevel", compressionLevel);
-
-
-    console.log("FormData creado");
 
     console.log("FormData creado");
 
     formData.forEach((value, key) => {
-        console.log(
-            "FORMDATA:",
-            key,
-            value
-        );
+        console.log("FORMDATA:", key, value);
     });
 
+    // 1. Obtenemos el token JWT guardado al iniciar sesión
+    const token = localStorage.getItem("token");
 
+    // 2. Agregamos el header de Authorization con el Bearer token
     const response = await fetch(API_URL, {
         method: "POST",
+        headers: {
+            ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+        },
         body: formData,
     });
 
-
-    console.log(
-        "Status API:",
-        response.status
-    );
-
+    console.log("Status API:", response.status);
 
     if (!response.ok) {
         throw new Error("Error al comprimir.");
     }
 
-
     const data = await response.json();
-
     console.log("JSON API:", data);
-
 
     return data;
 }
