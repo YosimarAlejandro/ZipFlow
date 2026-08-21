@@ -1,20 +1,45 @@
 import { useState, useEffect } from "react";
-import { Moon, Sun, Bell, User } from "lucide-react";
+import { Moon, Sun, Bell, User, LogOut } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 
 export default function Navbar() {
     const { darkMode, toggleTheme } = useTheme();
-    const [userName, setUserName] = useState("Yosimar");
-    const [userRole, setUserRole] = useState("User");
+    const [userName, setUserName] = useState("Cargando...");
+    const [userRole, setUserRole] = useState("...");
 
     useEffect(() => {
-        // Lee lo que guardamos en el login
-        const storedName = localStorage.getItem("userName");
-        const storedRole = localStorage.getItem("userRole");
-        
-        if (storedName) setUserName(storedName);
-        if (storedRole) setUserRole(storedRole);
+        const fetchNavbarUser = async () => {
+            try {
+                const token = localStorage.getItem("token");
+                if (!token) return;
+
+                const response = await fetch("http://localhost:5039/api/users/me", {
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.name) setUserName(data.name);
+                    if (data.role) setUserRole(data.role);
+                }
+            } catch (error) {
+                console.error("Error al cargar datos del usuario en el Navbar", error);
+            }
+        };
+
+        fetchNavbarUser();
     }, []);
+
+    // Función para cerrar sesión
+    const handleLogout = () => {
+        // Borramos el token y cualquier rastro guardado
+        localStorage.removeItem("token");
+        localStorage.removeItem("userName");
+        localStorage.removeItem("userRole");
+
+        // Redirigimos al login (ajusta la ruta si tu login es "/" o "/login")
+        window.location.href = "/login";
+    };
 
     return (
         <nav className={`
@@ -62,6 +87,15 @@ export default function Navbar() {
                             {userRole}
                         </span>
                     </div>
+
+                    {/* Botón de Cerrar Sesión */}
+                    <button 
+                        onClick={handleLogout}
+                        className="ml-2 p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition"
+                        title="Cerrar sesión"
+                    >
+                        <LogOut size={20} />
+                    </button>
                 </div>
             </div>
         </nav>

@@ -1,9 +1,65 @@
+import { useState, useEffect } from "react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
-
-// 1. Importamos tu nuevo componente dinámico
 import PlanCard from "../../components/pricing/PlanCard";
+import Swal from 'sweetalert2';
 
 export default function Perfil() {
+
+ const [user, setUser] = useState<any>(null); // Inicia en null para saber si ya cargó
+
+// 1. Cargar datos con logs para depurar
+useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("http://localhost:5039/api/users/me", {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log("Datos recibidos:", data);
+          setUser(data); // Guardamos el objeto directo
+        }
+      } catch (error) {
+        console.error("Error al cargar perfil", error);
+      }
+    };
+    fetchUser();
+  }, []);
+
+  // Lógica para editar nombre
+  const handleEdit = async () => {
+    const { value: newName } = await Swal.fire({
+      title: 'Editar Nombre',
+      input: 'text',
+      inputValue: user.Name,
+      showCancelButton: true,
+      confirmButtonText: 'Guardar',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (newName && newName !== user.Name) {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("http://localhost:5039/api/users/me", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ Name: newName })
+        });
+
+        if (response.ok) {
+          setUser({ ...user, Name: newName });
+          Swal.fire('¡Éxito!', 'Nombre actualizado correctamente', 'success');
+        }
+      } catch (error) {
+        Swal.fire('Error', 'No se pudo actualizar', 'error');
+      }
+    }
+  };
 
   // 2. Aquí metemos los datos de tus tres planes
   const plans = [
@@ -68,63 +124,41 @@ export default function Perfil() {
 
   return (
     <DashboardLayout>
-
       <div className="mb-10">
         <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Información Personal</h2>
         <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col md:flex-row gap-8 items-center">
-          {/* Avatar */}
+
+{/* Avatar dinámico */}
           <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-            JD
+            {user?.name ? user.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() : "YA"}
           </div>
 
-          {/* Datos */}
           <div className="flex-1 w-full space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="text-xs text-gray-500 font-medium">Nombre Completo</label>
-                <p className="text-gray-900 dark:text-white font-semibold">Juan Developer</p>
+                <p className="text-gray-900 dark:text-white font-semibold">
+                  {user ? user.name : "Cargando..."}
+                </p>
               </div>
               <div>
                 <label className="text-xs text-gray-500 font-medium">Correo Electrónico</label>
-                <p className="text-gray-900 dark:text-white font-semibold">juan@zipflow.com</p>
+                <p className="text-gray-900 dark:text-white font-semibold">
+                  {user ? user.email : "Cargando..."}
+                </p>
               </div>
             </div>
           </div>
-
-          {/* Botón de acción */}
-          <button className="px-5 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl text-sm font-semibold hover:opacity-90 transition">
+          <button
+            onClick={handleEdit}
+            className="px-5 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl text-sm font-semibold hover:opacity-90 transition"
+          >
             Editar Perfil
           </button>
         </div>
       </div>
-      <div className="mt-10">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Sesiones Activas</h2>
-        <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm space-y-4">
-          {/* Dispositivo 1 */}
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">💻</div>
-              <div>
-                <p className="text-sm font-semibold">Chrome - Windows 11</p>
-                <p className="text-xs text-gray-500">Última actividad: Hace 5 minutos</p>
-              </div>
-            </div>
-            <span className="text-xs text-green-500 font-medium">Sesión actual</span>
-          </div>
-          {/* Dispositivo 2 */}
-          <div className="flex justify-between items-center pt-4 border-t dark:border-gray-800">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">📱</div>
-              <div>
-                <p className="text-sm font-semibold">Safari - iPhone 15</p>
-                <p className="text-xs text-gray-500">Última actividad: Hace 2 días</p>
-              </div>
-            </div>
-            <button className="text-xs text-red-500 hover:underline">Cerrar sesión</button>
-          </div>
-        </div>
-      </div>
 
+      {/* ... resto de tu código (Sesiones y Planes) ... */}
       {/* Sección de Planes */}
       <div className="mt-8">
         <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
@@ -148,7 +182,6 @@ export default function Perfil() {
           ))}
         </div>
       </div>
-
     </DashboardLayout>
   );
 }

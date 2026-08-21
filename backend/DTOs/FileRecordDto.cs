@@ -2,6 +2,7 @@ namespace backend.DTOs
 {
     public class FileRecordDto
     {
+        public Guid Id { get; set; }
         public string OriginalFileName { get; set; } = string.Empty;
 
         public string OptimizedFileName { get; set; } = string.Empty;

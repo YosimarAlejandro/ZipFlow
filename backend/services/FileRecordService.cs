@@ -23,6 +23,7 @@ namespace backend.Services
                 .OrderByDescending(x => x.CreatedAt)
                 .Select(x => new FileRecordDto
                 {
+                    Id = x.Id,
                     OriginalFileName = x.OriginalFileName,
                     OptimizedFileName = x.OptimizedFileName,
                     OriginalSizeMB = x.OriginalSizeMB,
